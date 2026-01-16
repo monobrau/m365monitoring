@@ -56,34 +56,44 @@ Write-Host ""
 # Get the application
 Write-Host "[2/6] Getting application details..." -ForegroundColor Yellow
 try {
-    # First, find the application by AppId (Client ID)
-    Write-Host "  Searching for application with AppId: $AppId" -ForegroundColor Gray
+    # First, find the application by AppId (Client ID) or by name
+    if ($AppId) {
+        Write-Host "  Searching for application with AppId: $AppId" -ForegroundColor Gray
+    } else {
+        Write-Host "  Searching for application by display name..." -ForegroundColor Gray
+    }
     
     if ($AppObjectId) {
         # Use provided Object ID
         $app = Get-MgApplication -ApplicationId $AppObjectId -ErrorAction Stop
         Write-Host "  Using provided Object ID: $AppObjectId" -ForegroundColor Gray
-    } else {
+    } elseif ($AppId) {
         # Search by AppId
         $allApps = Get-MgApplication -All -ErrorAction Stop | Where-Object { $_.AppId -eq $AppId }
         if ($allApps) {
             $app = $allApps | Select-Object -First 1
             Write-Host "  Found application by AppId" -ForegroundColor Gray
-        } else {
-            # Try searching by display name
-            Write-Host "  AppId not found, searching by display name 'SKOUTCYBERSECURITY'..." -ForegroundColor Gray
-            $allApps = Get-MgApplication -All -ErrorAction Stop | Where-Object { 
-                $_.DisplayName -like "*SKOUT*" -or $_.DisplayName -like "*Barracuda*"
-            }
-            if ($allApps) {
-                $app = $allApps | Select-Object -First 1
-                Write-Host "  Found application by name: $($app.DisplayName)" -ForegroundColor Gray
-            }
+        }
+    }
+    
+    # If not found by AppId, search by display name
+    if (-not $app) {
+        Write-Host "  Searching by display name 'SKOUTCYBERSECURITY'..." -ForegroundColor Gray
+        $allApps = Get-MgApplication -All -ErrorAction Stop | Where-Object { 
+            $_.DisplayName -like "*SKOUT*" -or $_.DisplayName -like "*Barracuda*"
+        }
+        if ($allApps) {
+            $app = $allApps | Select-Object -First 1
+            Write-Host "  Found application by name: $($app.DisplayName)" -ForegroundColor Gray
         }
     }
     
     if (-not $app) {
-        throw "Application not found with AppId: $AppId"
+        if ($AppId) {
+            throw "Application not found with AppId: $AppId"
+        } else {
+            throw "Application not found. Please provide -AppId or -AppObjectId parameter, or ensure an application named 'SKOUTCYBERSECURITY' exists."
+        }
     }
     
     Write-Host "✓ Found application: $($app.DisplayName)" -ForegroundColor Green
