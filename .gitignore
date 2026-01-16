@@ -1,0 +1,22 @@
+# Credentials and secrets
+barracuda_xdr_credentials.json
+*.json
+!package*.json
+
+# PowerShell
+*.ps1.bak
+*.ps1.old
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
