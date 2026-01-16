@@ -1532,7 +1532,7 @@ function Start-SetupProcess {
         }
     } else {
         Write-Status "⚠ Audit logging not enabled. You can enable it later using the 'Enable Audit Logging' button." "Orange"
-        $script:StepsPerformed += "Skipped audit logging (user requested)"
+        # Don't add skipped step to StepsPerformed
     }
     
     # Step 7: Update UI with credentials
