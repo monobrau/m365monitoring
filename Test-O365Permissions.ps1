@@ -2,7 +2,7 @@
 # This script tests various methods to find and add the required permissions
 
 param(
-    [string]$AppId = "90f32348-0bbd-4e06-9f5b-d6878eddb454",  # This is the App (Client) ID
+    [string]$AppId = "",  # App (Client) ID - will search by name if not provided
     [string]$AppObjectId = ""  # Optional: Object ID if known
 )
 

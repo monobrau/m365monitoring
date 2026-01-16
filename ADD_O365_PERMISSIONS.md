@@ -30,9 +30,9 @@
 6. **Click "Add permissions"** button at the bottom
 
 7. **Grant Admin Consent:**
-   - Click "Grant admin consent for Borgelt Powell Peterson & Frauen SC"
+   - Click "Grant admin consent for [Your Domain]"
    - Confirm the action
-   - Wait for all permissions to show "Granted for Borgelt Powell Peterson & Frauen SC"
+   - Wait for all permissions to show "Granted for [Your Domain]"
 
 ## Verification
 
@@ -47,7 +47,7 @@ After adding, you should see:
 
 If you need to return to this page:
 ```
-https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/CallAnAPI/appId/90f32348-0bbd-4e06-9f5b-d6878eddb454
+https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/CallAnAPI/appId/YOUR_APP_ID
 ```
 
 ## Notes
