@@ -1,176 +1,204 @@
 # Barracuda XDR Microsoft 365 Monitoring Setup
 
-This PowerShell script provides a graphical user interface (GUI) for automating the setup process for Barracuda XDR monitoring of Microsoft 365.
+A PowerShell GUI application that automates the setup of Barracuda XDR for Microsoft 365 monitoring. This tool simplifies the configuration process by automating application registration, API permissions, admin consent, client secret creation, and audit logging enablement.
 
 ## Features
 
-- ✅ **Windows Forms GUI** - Easy-to-use graphical interface
-- ✅ **Automatic application registration** - Creates "SKOUTCYBERSECURITY" app in Entra ID
-- ✅ **API permissions configuration** - Automatically configures required permissions
-- ✅ **Client secret generation** - Creates 24-month expiry secret
-- ✅ **Audit logging enablement** - One-click audit logging setup
-- ✅ **Connection testing** - Verify your setup
-- ✅ **Credential management** - Copy to clipboard or save to file
+- **Graphical User Interface**: Easy-to-use Windows Forms GUI for all operations
+- **Automated Application Registration**: Creates or finds the required Entra ID application
+- **API Permissions Management**: Automatically configures Microsoft Graph and Office 365 Management API permissions
+- **Admin Consent**: Attempts to grant admin consent programmatically
+- **Client Secret Generation**: Creates and displays client secrets with expiration
+- **Audit Logging**: Enables unified audit logging for all mailboxes via Exchange Online
+- **Individual Copy Buttons**: Quick copy buttons for each credential field
+- **Ticket Notes Generator**: One-click copy of formatted ticket notes for documentation
+- **Connection Testing**: Verify application registration and permissions
 
-## Prerequisites
+## Requirements
 
-- **Windows PowerShell 5.1+** or **PowerShell 7+**
-- **Microsoft 365/Azure Global Administrator** or **Application Administrator** role
-- **Internet connection**
-- **Administrator rights** (recommended)
+- Windows PowerShell 5.1 or PowerShell 7+
+- Microsoft 365 Global Administrator account
+- Internet connection
+- Required PowerShell modules (installed automatically):
+  - `Microsoft.Graph` (for Entra ID operations)
+  - `ExchangeOnlineManagement` (for audit logging)
 
-## Installation
+## Quick Start
 
-1. **Open PowerShell as Administrator** (recommended)
+1. **Download the script**:
+   ```powershell
+   git clone https://github.com/monobrau/m365monitoring.git
+   cd m365monitoring
+   ```
 
-2. **Set execution policy** (if needed):
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+2. **Run the script**:
+   ```powershell
+   .\Setup-BarracudaXDR.ps1
+   ```
+
+3. **Follow the GUI prompts**:
+   - Click "Start Setup"
+   - Authenticate with your Microsoft 365 Global Admin account
+   - Review the generated credentials
+   - Copy credentials to Barracuda XDR Dashboard
+
+## What the Script Does
+
+### 1. Module Installation
+- Checks for and installs required PowerShell modules
+- Installs `Microsoft.Graph` and `ExchangeOnlineManagement` if missing
+
+### 2. Application Registration
+- Searches for existing "SKOUTCYBERSECURITY" application
+- Creates new application if not found
+- Configures as single-tenant application
+
+### 3. API Permissions Configuration
+- **Microsoft Graph Permissions**:
+  - `User.EnableDisableAccount.All`
+  - `User.ReadWrite.All`
+- **Office 365 Management API Permissions**:
+  - `ActivityFeed.Read`
+  - `ActivityFeed.ReadDlp`
+  - `ServiceHealth.Read`
+
+### 4. Admin Consent
+- Attempts to grant admin consent programmatically
+- Provides manual instructions if programmatic consent fails
+
+### 5. Client Secret Creation
+- Generates a new client secret
+- Sets expiration to 24 months
+- Displays secret value (save immediately - it won't be shown again)
+
+### 6. Audit Logging
+- Connects to Exchange Online
+- Enables unified audit log ingestion for all mailboxes
+- Verifies the configuration
+
+## GUI Features
+
+### Credential Fields
+- **Application ID**: Displays the App (Client) ID
+- **Tenant ID**: Displays the Directory (Tenant) ID
+- **Client Secret**: Displays the secret value (masked by default)
+- **Copy Buttons**: Individual copy buttons for each credential
+- **Show/Hide**: Toggle visibility of the client secret
+
+### Buttons
+- **Start Setup**: Begins the automated setup process
+- **Enable Audit Logging**: Manually enable audit logging (if skipped during setup)
+- **Test Connection**: Verify application registration and permissions
+- **Copy Ticket Notes**: Generate and copy formatted ticket notes
+- **Save to File**: Save credentials to a JSON file
+- **Copy All Credentials**: Copy all credentials at once
+
+### Ticket Notes Format
+The "Copy Ticket Notes" button generates formatted notes in this structure:
+```
+Task - 
+    - Configure Barracuda XDR for Microsoft 365 monitoring
+
+Step(s) performed - 
+    - [List of all concrete steps performed]
+
+Is the task resolved - 
+    - Yes
+
+Next step(s) - 
+    - None - all tasks complete
 ```
 
-3. **Run the script**:
-```powershell
-cd C:\Git\m365monitoring
-.\Setup-BarracudaXDR.ps1
-```
+## Manual Steps (if needed)
 
-## Usage
+### Office 365 Management API Permissions
+If the script cannot automatically add Office 365 Management API permissions:
 
-### Main Window
+1. Go to [Azure Portal](https://portal.azure.com) > App registrations > SKOUTCYBERSECURITY
+2. Click "API permissions" > "Add a permission"
+3. Select "APIs my organization uses"
+4. Search for "Office 365 Management API"
+5. Select "Application permissions"
+6. Add: `ActivityFeed.Read`, `ActivityFeed.ReadDlp`, `ServiceHealth.Read`
+7. Click "Add permissions" then "Grant admin consent"
 
-The GUI provides the following sections:
+### Admin Consent
+If programmatic consent fails:
 
-1. **Setup Status** - Shows real-time progress and status messages
-2. **Application Credentials** - Displays generated credentials
-3. **Action Buttons**:
-   - **Start Setup** - Begins the automated setup process
-   - **Enable Audit Logging** - Enables audit logging via Exchange Online
-   - **Test Connection** - Verifies the setup
-   - **Close** - Exits the application
+1. Go to Azure Portal > App registrations > SKOUTCYBERSECURITY
+2. Click "API permissions"
+3. Click "Grant admin consent for [Your Domain]"
+4. Confirm the action
 
-### Setup Process
+### Audit Logging
+If audit logging needs to be enabled manually:
 
-1. Click **"Start Setup"**
-2. A browser window will open for Microsoft 365 authentication
-3. Select your admin account and authenticate
-4. The script will automatically:
-   - Install required PowerShell modules (if needed)
-   - Connect to Microsoft Graph
-   - Register or find the application
-   - Configure API permissions
-   - Generate client secret
-5. Credentials will appear in the "Application Credentials" section
+1. Connect to Exchange Online PowerShell:
+   ```powershell
+   Connect-ExchangeOnline
+   ```
+2. Enable audit logging:
+   ```powershell
+   Set-AdminAuditLogConfig -UnifiedAuditLogIngestionEnabled $true
+   ```
 
-### Credential Management
+## Barracuda XDR Dashboard Configuration
 
-- **Show/Hide Secret** - Toggle visibility of the client secret
-- **Copy All Credentials** - Copies all credentials to clipboard
-- **Save to File** - Saves credentials to a JSON file
-
-### Enable Audit Logging
-
-Click **"Enable Audit Logging"** to:
-- Install Exchange Online Management module (if needed)
-- Connect to Exchange Online
-- Enable unified audit log ingestion
-- Verify configuration
-
-**Alternative**: Enable via Admin Center at https://portal.office.com > Compliance > Audit
-
-## API Permissions Configured
-
-### Office 365 Management API (Application Permissions)
-- `ActivityFeed.Read` - Read activity data for your organization
-- `ActivityFeed.ReadDlp` - Read DLP policy events including detected sensitive data
-- `ServiceHealth.Read` - Read service health information for your organization
-
-### Microsoft Graph API (Application Permissions)
-- `User.EnableDisableAccount.All` - Enable and disable user accounts
-- `User.ReadWrite.All` - Read and write all users' full profiles
-
-## Manual Steps Required
-
-### Grant Admin Consent
-
-After running setup:
-
-1. Go to https://portal.azure.com
-2. Navigate to: **Azure Active Directory** > **App registrations**
-3. Find **SKOUTCYBERSECURITY** application
-4. Click **API permissions**
-5. Click **Grant admin consent for [Your Domain]**
-6. Verify all permissions show "Granted for [Your Domain]"
-
-The script will display a direct link to the Azure Portal page.
-
-### Configure Barracuda XDR Dashboard
+After running the script:
 
 1. Log in to Barracuda XDR Dashboard
-2. Navigate to: **Administration** > **Integrations**
+2. Navigate to **Administration > Integrations**
 3. Click **Setup** on the Microsoft 365 card
-4. Enter credentials from the GUI:
-   - **Application ID**
-   - **Directory (Tenant) ID**
-   - **Client Secret**
+4. Enter the credentials from the script:
+   - **Application ID**: From the GUI
+   - **Directory (Tenant) ID**: From the GUI
+   - **Application Secret**: From the GUI
 5. Click **Test** to verify connection
 6. Click **Save**
 
-## Output Files
-
-The script can save credentials to a JSON file with the following format:
-
-```json
-{
-  "application_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-  "directory_tenant_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-  "client_secret": "your-secret-value",
-  "created_at": "2026-01-16T15:30:00.0000000-08:00"
-}
-```
-
 ## Troubleshooting
 
-### "Module not found" errors
-- The script will attempt to install required modules automatically
-- If installation fails, run manually:
-  ```powershell
-  Install-Module -Name Microsoft.Graph -Scope CurrentUser -Force
-  Install-Module -Name ExchangeOnlineManagement -Scope CurrentUser -Force
-  ```
+### Office 365 Management API Permissions Not Found
+- These permissions may not be exposed as AppRoles in all tenants
+- Use the manual steps above to add them via Azure Portal
+- The script will detect them once manually added
 
-### Authentication issues
-- Ensure you're using an account with Global Administrator or Application Administrator role
-- Check that MFA is properly configured
-- Verify internet connectivity
+### Exchange Online Connection Fails
+- Ensure you're using a Global Administrator account
+- Try running PowerShell as Administrator
+- Check if Exchange Online is available in your tenant
+- Use the "Enable Audit Logging" button to retry
 
-### Permission configuration fails
-- Some permissions may need to be added manually in Azure Portal
-- Ensure you grant admin consent after the script runs
-- Verify Office 365 Management API is available in your tenant
+### Admin Consent Fails
+- Requires Global Administrator privileges
+- Some tenants have policies that prevent programmatic consent
+- Use the manual steps provided in the script output
 
-### Audit logging script fails
-- Ensure you have Exchange Administrator role
-- Verify Exchange Online Management module is installed
-- Try manual enablement via Admin Center
+## Files
 
-### Connection test fails
-- Wait 24-48 hours after enabling audit logging
-- Verify admin consent was granted for all permissions
-- Check that credentials are correct
-- Ensure audit logging has been active for at least a few hours
+- `Setup-BarracudaXDR.ps1` - Main PowerShell GUI script
+- `Test-O365Permissions.ps1` - Test script for Office 365 Management API permissions
+- `enable_audit_logging.ps1` - Standalone audit logging script
+- `README.md` - This file
+- `QUICKSTART.md` - Quick start guide
+- `ADD_O365_PERMISSIONS.md` - Manual permission addition guide
 
-## Security Notes
+## Version
 
-- 🔒 **Keep credentials secure** - The client secret is shown only once
-- 🔒 **Do not share credentials** - Store them securely
-- 🔒 **Rotate secrets regularly** - Client secrets expire after 24 months
-- 🔒 **Review permissions** - Ensure only necessary permissions are granted
-- 🔒 **Monitor application usage** - Review in Azure Portal regularly
+**Version 1.0** - Initial release
+
+## License
+
+This project is provided as-is for use with Barracuda XDR and Microsoft 365.
 
 ## Support
 
 For issues or questions:
-- Review the Barracuda XDR documentation
-- Check Microsoft 365 audit log requirements
-- Verify Entra ID app registration permissions
-- Review PowerShell module documentation
+- Check the troubleshooting section above
+- Review the status messages in the GUI
+- Check Azure Portal for application status
+- Verify permissions in Barracuda XDR Dashboard
+
+## Contributing
+
+Contributions are welcome! Please ensure any changes maintain compatibility with the existing GUI and functionality.
